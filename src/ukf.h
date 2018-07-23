@@ -28,6 +28,14 @@ public:
   ///* state covariance matrix
   MatrixXd P_;
 
+  ///* Previous stable state vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
+  VectorXd x_prev;
+
+  ///* Previous stable state covariance matrix
+  MatrixXd P_prev;
+
+  long prev_stable_timestamp;
+
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
@@ -67,6 +75,19 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  // Previous Timestamp
+  long previous_timestamp_;
+
+  //NIS
+  double epsilon;
+
+  ///* Augmented sigma points matrix
+  MatrixXd Xsig_aug;
+
+  // measurement matrix
+  Eigen::MatrixXd H_laser_;
+
+  int iter;
 
   /**
    * Constructor
