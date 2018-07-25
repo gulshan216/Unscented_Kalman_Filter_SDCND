@@ -91,9 +91,9 @@ UKF::UKF() {
   // Initializing P
   P_ << 1, 0, 0, 0, 0,
         0, 1, 0, 0, 0,
-        0, 0, 1000, 0, 0,
-        0, 0, 0, 1000, 0,
-        0, 0, 0, 0, 1000;
+        0, 0, 1, 0, 0,
+        0, 0, 0, 1, 0,
+        0, 0, 0, 0, 1;
 
   //Initializing NIS
   epsilon = 0.0;
@@ -121,7 +121,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   measurements.
   */
 
-  cout << "process_meas" <<endl;
+  // cout << "process_meas" <<endl;
 
   /*****************************************************************************
    *  Initialization
@@ -135,7 +135,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     */
 
     // first measurement
-    cout << "UKF: " << endl;
+    // cout << "UKF: " << endl;
     // ekf_.x_ = VectorXd(4);
     // ekf_.x_ << 1, 1, 1, 1;
 
@@ -145,6 +145,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       */
       float x = meas_package.raw_measurements_[0]*cos(meas_package.raw_measurements_[1]);
       float y = meas_package.raw_measurements_[0]*sin(meas_package.raw_measurements_[1]);
+      // float rho_dot = meas_package.raw_measurements_[2];
+      // x_ << x, y, rho_dot, 0.0, 0.0;
       x_ << x, y, 0, 0, 0;
 
     }
@@ -161,7 +163,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     // done initializing, no need to predict or update
     is_initialized_ = true;
 
-    cout << "is_initialized" <<endl;
+    // cout << "is_initialized" <<endl;
     return;
   }
 
@@ -198,9 +200,9 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   P_aug(5,5) = std_a_*std_a_;
   P_aug(6,6) = std_yawdd_*std_yawdd_;
 
-  cout << "created mean state and cov matrix" <<endl;
-  cout << "X_aug = " << x_aug << endl;
-  cout << "P_aug = " << P_aug << endl;
+  // cout << "created mean state and cov matrix" <<endl;
+  // cout << "X_aug = " << x_aug << endl;
+  // cout << "P_aug = " << P_aug << endl;
 
   //create square root matrix
   // MatrixXd L = P_aug.llt().matrixL();
@@ -211,7 +213,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   }
   MatrixXd L = lltOfPaug.matrixL();
 
-  cout << "created sqrt matrix = " << L << endl;
+  // cout << "created sqrt matrix = " << L << endl;
 
   double scalar = sqrt(lambda_+n_aug_);
 
@@ -223,8 +225,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     Xsig_aug.col(i+1+n_aug_) = x_aug - scalar * L.col(i);
   }
   
-  cout << "created augmented sigma points" <<endl;
-  cout << "Xsig_aug = " << Xsig_aug << endl;
+  // cout << "created augmented sigma points" <<endl;
+  // cout << "Xsig_aug = " << Xsig_aug << endl;
 
   //compute the time elapsed between the current and previous measurements
   double delta_t = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0; //dt - expressed in seconds
@@ -240,7 +242,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   // }
   Prediction(delta_t);
 
-  cout << "Prediction_done" <<endl;
+  // cout << "Prediction_done" <<endl;
 
 
   /*****************************************************************************
@@ -263,9 +265,9 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   }
 
   // print the output
-  cout << "x_ = " << x_ << endl;
-  cout << "P_ = " << P_ << endl;
-  cout << "Iteration: " << iter << endl;
+  // cout << "x_ = " << x_ << endl;
+  // cout << "P_ = " << P_ << endl;
+  // cout << "Iteration: " << iter << endl;
   iter++;
 
 }
@@ -328,7 +330,7 @@ void UKF::Prediction(double delta_t) {
     Xsig_pred_(4,i) = yawd_p;
   }
 
-  cout << "Xsig_pred_ = " << Xsig_pred_ << endl;
+  // cout << "Xsig_pred_ = " << Xsig_pred_ << endl;
 
   //predicted state mean
   x_.fill(0.0);
@@ -336,7 +338,7 @@ void UKF::Prediction(double delta_t) {
     x_ = x_+ weights_(i) * Xsig_pred_.col(i);
   }
 
-  cout << "predicted mean state = " << x_ << endl;
+  // cout << "predicted mean state = " << x_ << endl;
 
   // cout << "delta_t" << delta_t <<endl;
   // cout << "Xsig_pred_(4,5)" << Xsig_pred_(4,5) << endl;
@@ -356,16 +358,16 @@ void UKF::Prediction(double delta_t) {
     while (x_diff(3)> M_PI) x_diff(3)-=2.*M_PI;
     while (x_diff(3)<-M_PI) x_diff(3)+=2.*M_PI;
 
-    cout << "x_diff = " << x_diff << endl;
+    // cout << "x_diff = " << x_diff << endl;
 
     P_ = P_ + weights_(i) * x_diff * x_diff.transpose() ;
 
-    cout << "w*x_diff*x_diff_T = " << weights_(i) * x_diff * x_diff.transpose() << endl;
+    // cout << "w*x_diff*x_diff_T = " << weights_(i) * x_diff * x_diff.transpose() << endl;
 
-    cout << "i = " << i << endl;
+    // cout << "i = " << i << endl;
   }
 
-  cout << "predicted state covariance = " << P_ <<endl;
+  // cout << "predicted state covariance = " << P_ <<endl;
 
 }
 
@@ -382,7 +384,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the lidar NIS.
   */
-  cout << "Lidar Update" << endl;
+  // cout << "Lidar Update" << endl;
   int n_z = 2;
   VectorXd z(n_z);
 
@@ -447,7 +449,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   You'll also need to calculate the radar NIS.
   */
 
-  cout << "Radar Update" << endl;
+  // cout << "Radar Update" << endl;
   int n_z = 3;
 
   //create matrix for sigma points in measurement space
@@ -483,7 +485,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
     z_pred = z_pred + weights_(i) * Zsig.col(i);
   }
 
-  cout << "calculated mean predicted measurement" << endl;
+  // cout << "calculated mean predicted measurement" << endl;
 
   MatrixXd R = MatrixXd(n_z, n_z);
   R.fill(0.0);
@@ -508,7 +510,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
   S = S + R;
 
-  cout << "calculated innovation covariance matrix S" << endl;
+  // cout << "calculated innovation covariance matrix S" << endl;
 
   //create matrix for cross correlation Tc
   MatrixXd Tc = MatrixXd(n_x_, n_z);
@@ -532,7 +534,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
     Tc = Tc + weights_(i) * x_diff * z_diff.transpose();
   }
 
-  cout << "calculated cross correlation matrix" << endl;
+  // cout << "calculated cross correlation matrix" << endl;
 
   //Kalman gain K;
   MatrixXd K = Tc * S.inverse();
@@ -552,7 +554,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   x_ = x_ + K * z_diff;
   P_ = P_ - K*S*K.transpose();
 
-  cout << "updated state mean and covariance matrix" << endl;
+  // cout << "updated state mean and covariance matrix" << endl;
 
 
   // Now check if the square root of P_aug is failing beforehand
